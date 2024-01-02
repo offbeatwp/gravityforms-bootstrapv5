@@ -11,7 +11,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "OffbeatWP\\GravityFormsBootstrapV4\\": "src"
+            "OffbeatWP\\GravityFormsBootstrapV5\\": "src"
         }
     },
     "require": {
