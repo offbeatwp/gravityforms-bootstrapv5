@@ -9,20 +9,25 @@ final class Service extends AbstractService
     public function register(View $view)
     {
         add_filter('gform_get_form_filter', [$this, 'bootstrapClasses'], 10, 2);
-        add_filter('gform_field_container', [$this, 'bootstrapContainer'], 10, 6);
-        add_filter('gform_field_content', [$this, 'fieldBootstrapClasses'], 10, 5);
+        add_filter('gform_field_container', [$this, 'bootstrapContainer'], 10, 2);
+        add_filter('gform_field_content', [$this, 'fieldBootstrapClasses']);
 
         add_filter('gform_submit_button', [$this, 'buttonClassFrontend'], 10, 2);
         add_filter('gform_submit_button', [$this, 'inputToButton'], 10, 2);
 
         if (is_admin()) {
-            add_action('gform_field_appearance_settings', [$this, 'customFields']);
-            add_action('gform_editor_js', [$this, 'customFieldSizes']);
-            add_filter('gform_tooltips', [$this, 'customFieldTooltips']);
+            add_action('gform_field_appearance_settings', [$this, 'customAdminFields']);
+            add_action('gform_editor_js', [$this, 'customAdminFieldSizes']);
+            add_filter('gform_tooltips', [$this, 'customAdminFieldTooltips']);
         }
     }
 
-    public static function bootstrapContainer($field_container, $field, $form, $css_class, $style, $field_content)
+    /**
+     * @param string $fieldContainer
+     * @param mixed[] $field
+     * @return mixed[]|string|null
+     */
+    public static function bootstrapContainer($fieldContainer, $field)
     {
         $replacement = 'class=$1$2 form-group';
 
@@ -46,9 +51,9 @@ final class Service extends AbstractService
 
         $replacement .= '$3';
 
-        $field_container = preg_replace('/class=(\'|")([^\'"]+)(\'|")/', $replacement, $field_container);
+        $fieldContainer = preg_replace('/class=(\'|")([^\'"]+)(\'|")/', $replacement, $fieldContainer);
 
-        return $field_container;
+        return $fieldContainer;
     }
 
     /**
@@ -78,13 +83,9 @@ final class Service extends AbstractService
 
     /**
      * @param string $fieldContent
-     * @param object $field
-     * @param string $value
-     * @param int $entryId
-     * @param int $formId
      * @return string
      */
-    public function fieldBootstrapClasses($fieldContent, $field, $value, $entryId, $formId)
+    public function fieldBootstrapClasses($fieldContent)
     {
         if (strpos($fieldContent, '<select') !== false) {
             preg_match_all('/<select[^>]+>/', $fieldContent, $selectTags);
@@ -112,7 +113,6 @@ final class Service extends AbstractService
                     $fieldContent = str_replace($radioTag, '<div class="form-check custom-' . $radioTags[2][$radioIndex] . '">' . $inputField . '</div>', $fieldContent);
                 }
             }
-
         }
 
         if (preg_match("/type='file'/", $fieldContent)) {
@@ -120,9 +120,8 @@ final class Service extends AbstractService
 
             if (!empty($inputFileTags[0])) {
                 foreach ($inputFileTags[0] as $inputFileTag) {
-                    $inputFileTagBs = preg_replace("/class='([^']+)'/", "class='$1 custom-file-input'", $inputFileTag);
-
-                    $fieldContent = str_replace($inputFileTag, '<label class="custom-file-label">' . __('Choose file', 'offbeatwp') . '</label>' . $inputFileTagBs, $fieldContent);
+                    $inputFileTagBs = preg_replace("/class='([^']+)'/", "class='$1 form-control'", $inputFileTag);
+                    $fieldContent = str_replace($inputFileTag, '<label class="form-label">' . __('Choose file', 'offbeatwp') . '</label>' . $inputFileTagBs, $fieldContent);
                 }
             }
 
@@ -143,7 +142,6 @@ final class Service extends AbstractService
         }
 
         return preg_replace("/class='([\.a-zA-Z_ -]+)'/", "class='$1 btn " . $form['button']['class']. "'", $button);
-
     }
 
     /**
@@ -164,13 +162,13 @@ final class Service extends AbstractService
      * @param int $position
      * @return void
      */
-    public function customFields($position)
+    public function customAdminFields($position)
     {
         if ($position !== 400 || !function_exists('gform_tooltip')) {
             return;
         }
-
         ?>
+
         <li class="col_xs_setting field_setting">
             <ul>
                 <li>
@@ -178,6 +176,7 @@ final class Service extends AbstractService
                         <?php esc_html_e('Field Size (mobile)', 'offbeatwp');?>
                         <?php gform_tooltip('form_field_col_xs');?>
                     </label>
+
                     <select id="field_col_xs" onchange="SetFieldProperty('colXs', this.value)">
                         <option value="12">12</option>
                         <option value="11">11</option>
@@ -203,6 +202,7 @@ final class Service extends AbstractService
                         <?php esc_html_e('Field Size (tablet)', 'offbeatwp');?>
                         <?php gform_tooltip('form_field_col_md');?>
                     </label>
+
                     <select id="field_col_md" onchange="SetFieldProperty('colMd', this.value)">
                         <option value="">Inherit</option>
                         <option value="12">12</option>
@@ -229,6 +229,7 @@ final class Service extends AbstractService
                         <?php esc_html_e('Field Size (desktop)', 'offbeatwp');?>
                         <?php gform_tooltip('form_field_col_lg');?>
                     </label>
+
                     <select id="field_col_lg" onchange="SetFieldProperty('colLg', this.value)">
                         <option value="">Inherit</option>
                         <option value="12">12</option>
@@ -248,10 +249,9 @@ final class Service extends AbstractService
             </ul>
         </li>
         <?php
-
     }
 
-    public function customFieldSizes()
+    public function customAdminFieldSizes(): void
     {
         ?>
         <script type="text/javascript">
@@ -273,13 +273,14 @@ final class Service extends AbstractService
             });
         </script>
         <?php
+
     }
 
     /**
      * @param mixed[] $tooltips
      * @return mixed[]
      */
-    public function customFieldTooltips($tooltips)
+    public function customAdminFieldTooltips($tooltips)
     {
         $tooltips['form_field_col_xs'] = sprintf(
             '<h6>%s</h6>%s',
