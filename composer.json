@@ -1,6 +1,6 @@
 {
-    "name": "offbeatwp/gravityforms-bootstrapv4",
-    "description": "Map gravityforms fields to bootstrap4 html",
+    "name": "offbeatwp/gravityforms-bootstrapv5",
+    "description": "Map gravityforms fields to bootstrap5 html",
     "license": "MIT",
     "type": "offbeatwp-service",
     "authors": [
