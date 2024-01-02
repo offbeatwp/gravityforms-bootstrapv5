@@ -1,5 +1,5 @@
 <?php
-namespace OffbeatWP\GravityFormsBootstrapV4;
+namespace OffbeatWP\GravityFormsBootstrapV5;
 
 use OffbeatWP\Services\AbstractService;
 use OffbeatWP\Contracts\View;
@@ -71,7 +71,6 @@ final class Service extends AbstractService
                     $formHtml = str_replace($gField, "class='" . $gFields[1][$gFieldIndex] . $class . "'", $formHtml);
                 }
             }
-
         }
 
         return $formHtml;
@@ -93,9 +92,9 @@ final class Service extends AbstractService
             if (!empty($selectTags[0])) {
                 foreach ($selectTags[0] as $selectTag) {
                     if (strpos($selectTag, 'class=') !== false) {
-                        $fieldContent = str_replace($selectTag, preg_replace("/class='([^']+)'/", "class='$1 custom-select'", $selectTag), $fieldContent);
+                        $fieldContent = str_replace($selectTag, preg_replace("/class='([^']+)'/", "class='$1 form-select'", $selectTag), $fieldContent);
                     } else {
-                        $fieldContent = str_replace($selectTag, str_replace('<select', '<select class="custom-select"', $selectTag), $fieldContent);
+                        $fieldContent = str_replace($selectTag, str_replace('<select', '<select class="form-select"', $selectTag), $fieldContent);
                     }
                 }
             }
@@ -107,10 +106,10 @@ final class Service extends AbstractService
             if (!empty($radioTags[0])) {
                 foreach ($radioTags[0] as $radioIndex => $radioTag) {
                     $inputField = $radioTag;
-                    $inputField = str_replace('<input', "<input class='custom-control-input'", $inputField);
-                    $inputField = str_replace('<label', "<label class='custom-control-label'", $inputField);
+                    $inputField = str_replace('<input', "<input class='form-check-input'", $inputField);
+                    $inputField = str_replace('<label', "<label class='form-check-label'", $inputField);
 
-                    $fieldContent = str_replace($radioTag, '<div class="custom-control custom-' . $radioTags[2][$radioIndex] . '">' . $inputField . '</div>', $fieldContent);
+                    $fieldContent = str_replace($radioTag, '<div class="form-check custom-' . $radioTags[2][$radioIndex] . '">' . $inputField . '</div>', $fieldContent);
                 }
             }
 
@@ -252,38 +251,28 @@ final class Service extends AbstractService
 
     }
 
-    public function customFieldSizes(): void
+    public function customFieldSizes()
     {
         ?>
         <script type="text/javascript">
-            console.log(fieldSettings);
             jQuery.map(fieldSettings, (el, i) => {
                 fieldSettings[i] += ', .col_xs_setting';
                 fieldSettings[i] += ', .col_md_setting';
                 fieldSettings[i] += ', .col_lg_setting';
             });
 
-            document.addEventListener('gform_load_field_settings', () => {
-               console.log("I hear ya gee form");
-            });
-
             jQuery(document).on('gform_load_field_settings', (ev, field) => {
-                document.querySelector('#field_col_xs').value = field.colXs || '12';
-                document.querySelector('#field_col_md').value = field.colMd || '';
-                document.querySelector('#field_col_lg').value = field.colLg || '';
+                jQuery('#field_col_xs').val(field.colXs || '12');
+                jQuery('#field_col_md').val(field.colMd || '');
+                jQuery('#field_col_lg').val(field.colLg || '');
             });
 
             // Disable original field size setting
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', () => {
-                    document.querySelector('.field_setting.size_setting')?.remove();
-                });
-            } else {
-                document.querySelector('.field_setting.size_setting')?.remove();
-            }
+            jQuery(document).ready(() => {
+                jQuery('.field_setting.size_setting').remove();
+            });
         </script>
         <?php
-
     }
 
     /**
