@@ -15,6 +15,6 @@
         }
     },
     "require": {
-        "offbeatwp/framework": "^2.1"
+        "offbeatwp/framework": ">=2"
     }
 }
