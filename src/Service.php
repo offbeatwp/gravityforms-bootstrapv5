@@ -121,10 +121,9 @@ final class Service extends AbstractService
             if (!empty($inputFileTags[0])) {
                 foreach ($inputFileTags[0] as $inputFileTag) {
                     $inputFileTagBs = preg_replace("/class='([^']+)'/", "class='$1 form-control'", $inputFileTag);
-                    $fieldContent = str_replace($inputFileTag, '<label class="form-label">' . __('Choose file', 'offbeatwp') . '</label>' . $inputFileTagBs, $fieldContent);
+                    $fieldContent = str_replace($inputFileTag, $inputFileTagBs, $fieldContent);
                 }
             }
-
         }
 
         return $fieldContent;
