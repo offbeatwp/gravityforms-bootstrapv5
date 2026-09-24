@@ -144,13 +144,30 @@ final class Service extends AbstractService
     }
 
     /**
+     * Convert the submit button markup from a legacy `<input>` element (Gravity Forms V2) to a `<button>` element.
+     * Gravity Forms V3+ already renders the submit button as a `<button>`, so for V3 there is nothing to convert -
+     * returning the markup unchanged keeps the `id`, `class`,     * `onclick` handler, `data-*` attributes and any
+     * other attributes intact. When neither an `<input>` nor a `<button>` is present, the original markup is returned as-is.
+     *
      * @param string $buttonInput
      * @param mixed[] $form
      * @return string
      */
     public static function inputToButton($buttonInput, $form)
     {
+        // Gravity Forms V3+ already renders the submit button as a <button> element.
+        // If the markup is already a <button>, the legacy <input> conversion below would rebuild
+        // `<button >{text}</button>` with every attribute stripped, so pass it through unchanged.
+        if (str_contains($buttonInput, '<button')) {
+            return $buttonInput;
+        }
+
         preg_match('/<input([^\/>]*)(\s\/)*>/', $buttonInput, $buttonMatch);
+
+        // No <input> tag was found either — bail out instead of rebuilding an empty <button>.
+        if (empty($buttonMatch)) {
+            return $buttonInput;
+        }
 
         $buttonAtts = str_replace("value='" . $form['button']['text'] . "' ", '', $buttonMatch[1]);
 
