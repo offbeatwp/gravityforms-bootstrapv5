@@ -165,7 +165,7 @@ final class Service extends AbstractService
         preg_match('/<input([^\/>]*)(\s\/)*>/', $buttonInput, $buttonMatch);
 
         // No <input> tag was found either — bail out instead of rebuilding an empty <button>.
-        if (empty($buttonMatch)) {
+        if (!$buttonMatch) {
             return $buttonInput;
         }
 
